@@ -11,4 +11,7 @@
 1. 登录时，只需要在`-name`和`-passwd`参数后填写用户名和密码，如果电信某一天又更改了登录地址，在`-host`后面填写更改后的IP地址。
 2. 如果需要存储账号和密码（密码由电信下发的RSA公钥加密存储），在`-cache`后填写文件的地址（包括文件名），例如`-cache ./cache.json`，在登录成功后会保存。下次仍需手动指定`-cache`读取。
 3. 如果需要登出（应该不会需要），添加`-logout`参数，不需要指定账号和密码，但是需要指定`-index`（要抓包才知道），但是也可以直接用上次登录的cache。
+4. 编译好的二进制文件可以在Actions里面下载，如果你需要其他架构可以提issue。
 
+## 友情链接
+如果你需要校园网登陆，可以使用[go-nd-portal](https://github.com/fumiama/go-nd-portal)。这个项目的作者[@fumiama](https://github.com/fumiama)是我最崇敬的网络工程师与Golang程序员。同时，你也可以使用由世界上最棒的语言®重写的版本[nd-portal](https://github.com/NetUnion/nd-portal)。
