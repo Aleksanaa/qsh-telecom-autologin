@@ -1,0 +1,19 @@
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: DeterminateSystems/nix-installer-action@main
+    - uses: DeterminateSystems/magic-nix-cache-action@main
+    - run: nix build -L .#default
+    - uses: actions/upload-artifact@v3
+      with:
+        name: static-build
+        path: result/bin
