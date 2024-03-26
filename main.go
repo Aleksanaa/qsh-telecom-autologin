@@ -245,7 +245,7 @@ func (c *loginClient) saveCache() {
 func (c *loginClient) run() {
 	flag.StringVar(&c.username, "name", "", "Account name, usually phone number")
 	flag.StringVar(&c.password, "passwd", "", "Password to the account")
-	flag.StringVar(&c.initHost, "host", "172.25.249.64", "Domain of the login page, usually ip address")
+	flag.StringVar(&c.initHost, "host", "172.25.249.70", "Domain of the login page, usually ip address")
 	flag.StringVar(&c.cachePath, "cache", "", "Specify where to read and store cache, blank to disable")
 	flag.StringVar(&c.userIndex, "index", "", "User Index of user, only for logging out")
 	logout := flag.Bool("logout", false, "Whether to log out current user")
