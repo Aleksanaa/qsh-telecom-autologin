@@ -63,11 +63,6 @@ func (c *loginClient) Post(urlString string, body io.Reader) *http.Response {
 }
 
 func (c *loginClient) Do(req *http.Request) *http.Response {
-	dialer := &net.Dialer{
-		Timeout:   30 * time.Second,
-		KeepAlive: 30 * time.Second,
-	}
-
 	var dialContext func(ctx context.Context, network, addr string) (net.Conn, error)
 
 	if c.localIP != "" {
@@ -88,6 +83,10 @@ func (c *loginClient) Do(req *http.Request) *http.Response {
 			return d.DialContext(ctx, network, addr)
 		}
 	} else {
+		dialer := &net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}
 		dialContext = dialer.DialContext
 	}
 
