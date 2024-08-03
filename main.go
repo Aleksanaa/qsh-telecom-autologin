@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"encoding/hex"
 	"encoding/json"
 	"flag"
 	"io"
 	"log"
 	"math/big"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -29,6 +31,7 @@ var baseHeader = map[string]string{
 
 type loginClient struct {
 	c           http.Client
+	localIP     string
 	cachePath   string
 	username    string
 	password    string
@@ -60,6 +63,37 @@ func (c *loginClient) Post(urlString string, body io.Reader) *http.Response {
 }
 
 func (c *loginClient) Do(req *http.Request) *http.Response {
+	var dialContext func(ctx context.Context, network, addr string) (net.Conn, error)
+
+	if c.localIP != "" {
+		localIP := net.ParseIP(c.localIP)
+		if localIP == nil {
+			log.Fatalf("Invalid local IP: %s", c.localIP)
+		}
+
+		dialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
+			localAddr := &net.TCPAddr{
+				IP: localIP,
+			}
+			d := net.Dialer{
+				LocalAddr: localAddr,
+				Timeout:   30 * time.Second,
+				KeepAlive: 30 * time.Second,
+			}
+			return d.DialContext(ctx, network, addr)
+		}
+	} else {
+		dialer := &net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}
+		dialContext = dialer.DialContext
+	}
+
+	c.c.Transport = &http.Transport{
+		DialContext: dialContext,
+	}
+
 	for k, v := range baseHeader {
 		req.Header.Add(k, v)
 	}
@@ -108,7 +142,7 @@ func (c *loginClient) myPost(urlString string, reqData map[string]string, respDa
 
 func (c *loginClient) loginInit() {
 	urlString := "http://" + c.initHost
-	for true {
+	for {
 		resp := c.Get(urlString)
 		if resp.StatusCode == http.StatusFound {
 			urlString = resp.Header.Get("Location")
@@ -248,6 +282,7 @@ func (c *loginClient) run() {
 	flag.StringVar(&c.initHost, "host", "172.25.249.70", "Domain of the login page, usually ip address")
 	flag.StringVar(&c.cachePath, "cache", "", "Specify where to read and store cache, blank to disable")
 	flag.StringVar(&c.userIndex, "index", "", "User Index of user, only for logging out")
+	flag.StringVar(&c.localIP, "localip", "", "Local IP address to bind to")
 	logout := flag.Bool("logout", false, "Whether to log out current user")
 	flag.Parse()
 
